@@ -1,5 +1,6 @@
 from room import Room
 from player import Player
+from item import Item
 
 # Declare all the rooms
 
@@ -21,6 +22,41 @@ to north. The smell of gold permeates the air."""),
 chamber! Sadly, it has already been completely emptied by
 earlier adventurers. The only exit is to the south."""),
 }
+
+# Methods
+
+def parse_command(command, player):
+    # make sure it's a valid command
+    if command[0] == "get" or command[0] == "take":
+        pickup_item = [item for item in player.room.items if item.name == command[1]]
+        if len(pickup_item) == 0:
+            print(f"There is no {command[1]} in this room")
+        else:
+            player.take_item(pickup_item[0])
+            player.room.take_item(pickup_item[0])
+    elif command[0] == "drop":
+        drop_item = [item for item in player.inventory if item.name == command[1]]
+        if len(drop_item) == 0:
+            print(f"There is no {command[1]} in your inventory")
+        else:
+            player.drop_item(pickup_item[0])
+            player.room.add_item(pickup_item[0])
+        
+
+
+
+
+# Declare Items
+
+item = {
+    'sword': Item("sword", "An old sword that doesn't look very strong"),
+    'key': Item("key", "A shiny gold Key"),
+    'book': Item("book", "A dusty book written in another language. You can't read any of it")
+}
+
+room['foyer'].add_item(item['book'])
+room['narrow'].add_item(item['key'])
+room['narrow'].add_item(item['sword'])
 
 
 # Link rooms together
@@ -63,7 +99,7 @@ print(player.room.description)
 while True:
     
     
-    cmd = input("\nWhat direction would you like to move? n/e/s/w \n")
+    cmd = input("\nPlease enter a command: \n")
 
     if cmd == 'q':
         break
@@ -75,14 +111,23 @@ while True:
         'w': player.room.w_to
     }
 
-    # checking to see if it's a room you can go to
-    if next_room[cmd] != None:
-        player.room = next_room[cmd]
-        print(f"\nYou arrive at the {player.room.name}\n")
-        print(player.room.description)
+    split_command = cmd.split()
+
+    # See if they did a pick up or drop command
+    if len(split_command) == 2:
+        parse_command(split_command, player)
+    # See if they want inventory
+    elif cmd == "i" or cmd == "inventory":
+        player.print_items()
     # see if they even put in a real direction
     elif not cmd in next_room.keys():
         print("Not a valid Input")
+    # checking to see if it's a room you can go to
+    elif next_room[cmd] != None:
+        player.room = next_room[cmd]
+        print(f"\nYou arrive at the {player.room.name}\n")
+        print(player.room.description)
+        player.room.print_items()
     elif next_room[cmd] == None:
         print("You can not move that direction from here")
 
