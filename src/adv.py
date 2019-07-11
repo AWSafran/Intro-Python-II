@@ -23,29 +23,6 @@ chamber! Sadly, it has already been completely emptied by
 earlier adventurers. The only exit is to the south."""),
 }
 
-# Methods
-
-def parse_command(command, player):
-    # make sure it's a valid command
-    if command[0] == "get" or command[0] == "take":
-        pickup_item = [item for item in player.room.items if item.name == command[1]]
-        if len(pickup_item) == 0:
-            print(f"There is no {command[1]} in this room")
-        else:
-            player.take_item(pickup_item[0])
-            player.room.take_item(pickup_item[0])
-    elif command[0] == "drop":
-        drop_item = [item for item in player.inventory if item.name == command[1]]
-        if len(drop_item) == 0:
-            print(f"There is no {command[1]} in your inventory")
-        else:
-            player.drop_item(pickup_item[0])
-            player.room.add_item(pickup_item[0])
-        
-
-
-
-
 # Declare Items
 
 item = {
@@ -70,26 +47,10 @@ room['narrow'].w_to = room['foyer']
 room['narrow'].n_to = room['treasure']
 room['treasure'].s_to = room['narrow']
 
-#
-# Main
-#
-
-# Make a new player object that is currently in the 'outside' room.
  
 name = input("Please enter your name to begin: ")
 
 player = Player(name, room['outside'])
-
-# Write a loop that:
-#
-# * Prints the current room name
-# * Prints the current description (the textwrap module might be useful here).
-# * Waits for user input and decides what to do.
-#
-# If the user enters a cardinal direction, attempt to move to the room there.
-# Print an error message if the movement isn't allowed.
-#
-# If the user enters "q", quit the game.
 
 
 
@@ -115,7 +76,7 @@ while True:
 
     # See if they did a pick up or drop command
     if len(split_command) == 2:
-        parse_command(split_command, player)
+        player.parse_command(split_command)
     # See if they want inventory
     elif cmd == "i" or cmd == "inventory":
         player.print_items()
@@ -123,12 +84,9 @@ while True:
     elif not cmd in next_room.keys():
         print("Not a valid Input")
     # checking to see if it's a room you can go to
-    elif next_room[cmd] != None:
-        player.room = next_room[cmd]
-        print(f"\nYou arrive at the {player.room.name}\n")
-        print(player.room.description)
-        player.room.print_items()
-    elif next_room[cmd] == None:
+    elif next_room[cmd] is not None:
+        player.enter_room(next_room[cmd])
+    elif next_room[cmd] is None:
         print("You can not move that direction from here")
 
 print("Thanks for playing!")
