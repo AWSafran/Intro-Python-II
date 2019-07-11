@@ -1,5 +1,6 @@
 # Write a class to hold player information, e.g. what room they are in
 # currently.
+from unlockable import Unlockable
 
 class Player:
     def __init__(self, name, room):
@@ -7,6 +8,8 @@ class Player:
         self.room = room
         self.inventory = []
         self.has_torch = False
+        self.has_treasure = False
+        self.escaped = False
 
     def take_item(self, item):
         item.on_take()
@@ -25,12 +28,16 @@ class Player:
 
     def enter_room(self, room):
         self.room = room
-        print(f"You arrive in the {room.name}")
-        if not self.can_see():
-            print(f"It's too dark to see in here")
+        if room.name == "Outside Cave Entrance" and self.has_treasure:
+            print("You Made it to safety!")
+            self.escaped = True
         else:
-            print(room.description)
-            room.print_items()
+            print(f"You arrive in the {room.name}")
+            if not self.can_see() or self.has_treasure:
+                print(f"It's too dark to see in here")
+            else:
+                print(room.description)
+                room.print_items()
 
     def can_see(self):
         if self.room.is_dark and not self.has_torch:
@@ -44,6 +51,10 @@ class Player:
         else:
             for item in self.inventory:
                 print(item)
+    
+    def take_treasure(self):
+        self.has_treasure = True
+        print("A darkness descends over the land. 100 torches couldn't illuminate your surroundings. \n It's time to go")
 
     def parse_command(self, command):
         # make sure it's a valid command
@@ -59,6 +70,8 @@ class Player:
                 print("That item is not in this room")
             else:
                 self.take_item(pickup_item)
+                if pickup_item.name == "treasure":
+                    self.take_treasure()
 
         elif command[0] == "drop":
             drop_item = None
@@ -70,4 +83,17 @@ class Player:
                 print("You do not have that item in your inventory")
             else:
                 self.drop_item(drop_item)
+        elif command[0] == "use":
+            use_item = False
+            for item in self.inventory:
+                if item.name == command[1]:
+                    use_item = True
+            
+            if use_item:
+                if isinstance(self.room, Unlockable):
+                    self.room.activate(command[1])
+                else:
+                    print("Nothing happened")
+            else:
+                print("You do not have that item in your inventory")
     
