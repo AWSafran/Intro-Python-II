@@ -59,7 +59,7 @@ room['lighthouse'].e_to = room['shed']
 room['shed'].w_to = room['lighthouse']
 room['overlook'].secret_room = room['lighthouse']
 
- 
+print("Welcome to Treasure Hunter! Find the treasure and escape to win!") 
 name = input("Please enter your name to begin: ")
 
 player = Player(name, room['outside'])
